@@ -1,5 +1,10 @@
-// Data layer: loads committed seed data, merges browser-local edits,
-// computes differentials, and persists user changes to localStorage.
+// Data layer: loads committed seed data, merges user edits (from cloud when
+// connected, otherwise this browser's localStorage), computes differentials.
+
+import {
+  cloudEnabled, cloudGetRecords, cloudUpsertRecord,
+  cloudGetNews, cloudUpsertNews, cloudDeleteNews,
+} from './cloud.js';
 
 export const PRODUCTS = [
   { code: 'MF05', name: 'Marine Fuel 0.5', unit: 'USD/mt', active: true, file: 'data/marine-fuel-05.json' },
@@ -51,15 +56,26 @@ export function withDiffs(r) {
   };
 }
 
-// Merge seed + local edits, returns sorted, diff-enriched array.
+// Merge seed baseline + user edit layer (cloud when connected, else local
+// cache). Returns a sorted, differential-enriched array.
 export async function getRecords(code) {
   const seed = await loadSeed(code);
   const map = {};
   for (const r of (seed.records || [])) map[r.date] = { ...r, _src: 'seed' };
-  const local = readLocal(code);
-  for (const [date, r] of Object.entries(local)) {
+
+  let layer = readLocal(code);
+  if (cloudEnabled()) {
+    try {
+      layer = await cloudGetRecords(code);
+      writeLocal(code, layer); // keep an offline cache
+    } catch (e) {
+      console.warn('Cloud read failed, using local cache:', e.message);
+    }
+  }
+
+  for (const [date, r] of Object.entries(layer)) {
     if (r && r._deleted) { delete map[date]; continue; }
-    map[date] = { ...r, date, _src: 'local' };
+    map[date] = { ...r, date, _src: cloudEnabled() ? 'cloud' : 'local' };
   }
   return Object.values(map)
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -77,36 +93,54 @@ export async function getMeta(code) {
   };
 }
 
-export function saveRecord(code, rec) {
-  const map = readLocal(code);
-  map[rec.date] = {
+export async function saveRecord(code, rec) {
+  const clean = {
     date: rec.date,
     mops: rec.mops ?? null,
     mocM: rec.mocM ?? null,
     mocM1: rec.mocM1 ?? null,
   };
-  writeLocal(code, map);
-}
-
-export function deleteRecord(code, date) {
   const map = readLocal(code);
-  // Tombstone so seed rows can also be hidden.
-  map[date] = { _deleted: true };
-  writeLocal(code, map);
+  map[rec.date] = clean;
+  writeLocal(code, map); // write-through cache
+  if (cloudEnabled()) await cloudUpsertRecord(code, clean);
 }
 
-export function importRecords(code, records, mode = 'merge') {
+export async function deleteRecord(code, date) {
+  const map = readLocal(code);
+  map[date] = { _deleted: true }; // tombstone so seed rows hide too
+  writeLocal(code, map);
+  if (cloudEnabled()) await cloudUpsertRecord(code, { date }, true);
+}
+
+export async function importRecords(code, records, mode = 'merge') {
   const map = mode === 'replace' ? {} : readLocal(code);
+  const clean = [];
   for (const r of records) {
     if (!r.date) continue;
-    map[r.date] = {
-      date: r.date,
-      mops: numOrNull(r.mops),
-      mocM: numOrNull(r.mocM),
-      mocM1: numOrNull(r.mocM1),
-    };
+    const c = { date: r.date, mops: numOrNull(r.mops), mocM: numOrNull(r.mocM), mocM1: numOrNull(r.mocM1) };
+    map[r.date] = c;
+    clean.push(c);
   }
   writeLocal(code, map);
+  if (cloudEnabled()) {
+    for (const c of clean) await cloudUpsertRecord(code, c);
+  }
+}
+
+// Push everything currently in this browser's cache up to the cloud
+// (used once after connecting, to migrate entries added while offline).
+export async function pushLocalToCloud(code) {
+  const map = readLocal(code);
+  let n = 0;
+  for (const [date, r] of Object.entries(map)) {
+    if (r && r._deleted) { await cloudUpsertRecord(code, { date }, true); n++; }
+    else { await cloudUpsertRecord(code, { date, mops: r.mops, mocM: r.mocM, mocM1: r.mocM1 }); n++; }
+  }
+  // news
+  const news = JSON.parse(localStorage.getItem(LS_NEWS) || '[]');
+  for (const item of news) await cloudUpsertNews(item);
+  return { records: n, news: news.length };
 }
 
 function numOrNull(v) {
@@ -116,24 +150,38 @@ function numOrNull(v) {
 }
 
 // ---- News ----
-export function getNews() {
+function readNewsLocal() {
   try { return JSON.parse(localStorage.getItem(LS_NEWS) || '[]'); }
   catch { return []; }
 }
-export function saveNews(item) {
-  const list = getNews();
-  if (item.id) {
-    const i = list.findIndex((n) => n.id === item.id);
-    if (i >= 0) list[i] = item; else list.push(item);
-  } else {
-    item.id = 'n' + Date.now();
-    list.push(item);
+function writeNewsLocal(list) { localStorage.setItem(LS_NEWS, JSON.stringify(list)); }
+
+export async function getNews() {
+  if (cloudEnabled()) {
+    try {
+      const list = await cloudGetNews();
+      writeNewsLocal(list);
+      return list;
+    } catch (e) {
+      console.warn('Cloud news read failed, using local cache:', e.message);
+    }
   }
-  localStorage.setItem(LS_NEWS, JSON.stringify(list));
+  return readNewsLocal();
+}
+
+export async function saveNews(item) {
+  const list = readNewsLocal();
+  if (!item.id) item.id = 'n' + Date.now();
+  const i = list.findIndex((n) => n.id === item.id);
+  if (i >= 0) list[i] = item; else list.push(item);
+  writeNewsLocal(list);
+  if (cloudEnabled()) await cloudUpsertNews(item);
   return item;
 }
-export function deleteNews(id) {
-  localStorage.setItem(LS_NEWS, JSON.stringify(getNews().filter((n) => n.id !== id)));
+
+export async function deleteNews(id) {
+  writeNewsLocal(readNewsLocal().filter((n) => n.id !== id));
+  if (cloudEnabled()) await cloudDeleteNews(id);
 }
 
 // ---- Export helpers ----

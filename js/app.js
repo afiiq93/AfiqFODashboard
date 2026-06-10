@@ -2,6 +2,7 @@ import { PRODUCTS, productByCode } from './store.js';
 import { renderDashboard } from './dashboard.js';
 import { renderEntry } from './entry.js';
 import { renderNews } from './news.js';
+import { renderSettings } from './settings.js';
 
 const state = {
   product: localStorage.getItem('afo:product') || 'MF05',
@@ -11,6 +12,7 @@ const routes = {
   dashboard: renderDashboard,
   entry: renderEntry,
   news: renderNews,
+  settings: renderSettings,
 };
 
 function currentRoute() {

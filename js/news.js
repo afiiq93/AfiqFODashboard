@@ -5,7 +5,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (s) => new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
 export async function renderNews(view, state) {
-  const news = getNews().sort((a, b) => b.date.localeCompare(a.date));
+  const news = (await getNews()).sort((a, b) => b.date.localeCompare(a.date));
 
   // Price context: map of date -> MOPS day-on-day move for the active product,
   // so a headline can be read against how the market actually moved.
@@ -64,18 +64,20 @@ export async function renderNews(view, state) {
     </div>
   `;
 
-  view.querySelector('#newsForm').addEventListener('submit', (e) => {
+  view.querySelector('#newsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const g = (id) => view.querySelector('#' + id).value.trim();
     if (!g('nhead')) { toast('Add a headline'); return; }
-    saveNews({ date: g('ndate'), sentiment: view.querySelector('#nsent').value, source: g('nsource'),
-      url: g('nurl'), headline: g('nhead'), body: g('nbody') });
-    toast('Headline saved');
+    try {
+      await saveNews({ date: g('ndate'), sentiment: view.querySelector('#nsent').value, source: g('nsource'),
+        url: g('nurl'), headline: g('nhead'), body: g('nbody') });
+      toast('Headline saved');
+    } catch (err) { toast('Saved locally — cloud sync failed'); console.error(err); }
     rerender();
   });
 
   view.querySelectorAll('[data-delnews]').forEach((b) =>
-    b.addEventListener('click', () => { if (confirm('Delete this headline?')) { deleteNews(b.dataset.delnews); rerender(); } })
+    b.addEventListener('click', async () => { if (confirm('Delete this headline?')) { await deleteNews(b.dataset.delnews); rerender(); } })
   );
 }
 

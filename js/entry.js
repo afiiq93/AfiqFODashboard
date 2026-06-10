@@ -108,13 +108,19 @@ export async function renderEntry(view, state) {
   dateEl.addEventListener('change', loadExisting);
   loadExisting();
 
-  view.querySelector('#entryForm').addEventListener('submit', (e) => {
+  view.querySelector('#entryForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const rec = readForm();
     if (rec.mops == null && rec.mocM == null && rec.mocM1 == null) { toast('Enter at least one value'); return; }
-    saveRecord(state.product, rec);
-    toast('Saved ' + rec.date);
-    rerender();
+    try {
+      await saveRecord(state.product, rec);
+      toast('Saved ' + rec.date);
+      rerender();
+    } catch (err) {
+      toast('Saved locally — cloud sync failed');
+      console.error(err);
+      rerender();
+    }
   });
 
   // import / export
@@ -124,7 +130,7 @@ export async function renderEntry(view, state) {
     try {
       const text = await file.text();
       const recs = file.name.endsWith('.json') ? parseJson(text) : parseCsv(text);
-      importRecords(state.product, recs, $('importMode').value);
+      await importRecords(state.product, recs, $('importMode').value);
       $('importStatus').textContent = `Imported ${recs.length} rows.`;
       toast(`Imported ${recs.length} rows`);
       rerender();

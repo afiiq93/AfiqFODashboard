@@ -98,8 +98,8 @@ export async function renderDashboard(view, state) {
     toast('JSON backup downloaded');
   });
   view.querySelectorAll('[data-del]').forEach((b) =>
-    b.addEventListener('click', () => {
-      if (confirm(`Delete record for ${b.dataset.del}?`)) { deleteRecord(state.product, b.dataset.del); rerender(); }
+    b.addEventListener('click', async () => {
+      if (confirm(`Delete record for ${b.dataset.del}?`)) { await deleteRecord(state.product, b.dataset.del); rerender(); }
     })
   );
 
