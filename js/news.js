@@ -1,5 +1,6 @@
 import { getNews, saveNews, deleteNews, getRecords, productByCode } from './store.js';
 import { aiEnabled, summarizeArticle } from './ai.js';
+import { fetchFeeds, relativeTime } from './feed.js';
 import { toast, rerender } from './app.js';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -21,6 +22,15 @@ export async function renderNews(view, state) {
   view.innerHTML = `
     <div class="page-head"><h1>Market News</h1></div>
     <p class="page-sub">Log the headlines that move the market and tag them bullish / bearish / neutral. Each item shows how MOPS moved that day so you can see the link between news and price.</p>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Live oil &amp; market news</h2>
+        <button class="btn btn-sm" id="feedRefresh">Refresh</button>
+      </div>
+      <p class="hint">Latest headlines from your feeds. Use <b>Summarise &amp; log</b> to turn one into a logged entry. Manage feeds in Settings.</p>
+      <div id="feedList"><div class="empty">Loading feed…</div></div>
+    </div>
 
     <div class="panel">
       <h2>Summarise an article with AI</h2>
@@ -95,6 +105,84 @@ export async function renderNews(view, state) {
   view.querySelectorAll('[data-delnews]').forEach((b) =>
     b.addEventListener('click', async () => { if (confirm('Delete this headline?')) { await deleteNews(b.dataset.delnews); rerender(); } })
   );
+
+  // ---- live feed ----
+  let feedItems = [];
+  const feedList = view.querySelector('#feedList');
+
+  function feedItemHtml(it, i) {
+    const when = relativeTime(it.pubDate);
+    const title = it.link ? `<a href="${it.link}" target="_blank" rel="noopener">${escape(it.title)}</a>` : escape(it.title);
+    return `<div class="news-item">
+      <div class="meta"><span>${escape(it.source)}</span>${when ? `<span>· ${when}</span>` : ''}</div>
+      <h3>${title}</h3>
+      ${it.snippet ? `<div class="body">${escape(it.snippet)}</div>` : ''}
+      <div class="form-actions" style="margin-top:10px">
+        ${aiReady ? `<button class="btn btn-sm btn-primary" data-feedai="${i}">Summarise &amp; log</button>` : ''}
+        <button class="btn btn-sm" data-feeduse="${i}">Use in form</button>
+      </div>
+    </div>`;
+  }
+
+  async function loadFeed() {
+    feedList.innerHTML = '<div class="empty">Loading feed…</div>';
+    try {
+      const { items, errors } = await fetchFeeds();
+      feedItems = items;
+      if (!items.length) {
+        feedList.innerHTML = `<div class="empty">No headlines loaded${errors.length ? ' (feeds unreachable)' : ''}. Check your feeds in Settings.</div>`;
+        return;
+      }
+      feedList.innerHTML = (errors.length ? `<p class="hint">Couldn't reach: ${errors.map(escape).join(', ')}.</p>` : '')
+        + items.slice(0, 20).map(feedItemHtml).join('');
+      wireFeedButtons();
+    } catch (err) {
+      feedList.innerHTML = `<div class="empty">Couldn't load the feed: ${escape(err.message)}</div>`;
+    }
+  }
+
+  function fillForm(it) {
+    view.querySelector('#nhead').value = it.title || '';
+    view.querySelector('#nsource').value = it.source || '';
+    view.querySelector('#nurl').value = it.link || '';
+    const d = new Date(it.pubDate);
+    if (!isNaN(d)) view.querySelector('#ndate').value = d.toISOString().slice(0, 10);
+  }
+
+  function wireFeedButtons() {
+    feedList.querySelectorAll('[data-feeduse]').forEach((b) =>
+      b.addEventListener('click', () => {
+        fillForm(feedItems[+b.dataset.feeduse]);
+        view.querySelector('#nhead').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        toast('Filled the form — review and Save');
+      })
+    );
+    feedList.querySelectorAll('[data-feedai]').forEach((b) =>
+      b.addEventListener('click', async () => {
+        const it = feedItems[+b.dataset.feedai];
+        b.disabled = true; b.textContent = 'Summarising…';
+        try {
+          const s = await summarizeArticle(`${it.title}\n\n${it.snippet}\n\nSource: ${it.source}\nURL: ${it.link}`);
+          view.querySelector('#nhead').value = s.headline || it.title;
+          view.querySelector('#nsent').value = ['bull', 'bear', 'neutral'].includes(s.price_read) ? s.price_read : 'neutral';
+          view.querySelector('#nsource').value = s.source || it.source;
+          view.querySelector('#nurl').value = it.link || '';
+          view.querySelector('#nbody').value = formatBrief(s);
+          const d = new Date(it.pubDate);
+          if (!isNaN(d)) view.querySelector('#ndate').value = d.toISOString().slice(0, 10);
+          view.querySelector('#nhead').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          toast('Summarised — review and Save');
+        } catch (err) {
+          toast('Summary failed: ' + err.message);
+        } finally {
+          b.disabled = false; b.textContent = 'Summarise & log';
+        }
+      })
+    );
+  }
+
+  view.querySelector('#feedRefresh').addEventListener('click', loadFeed);
+  loadFeed();
 
   if (aiReady) {
     const btn = view.querySelector('#aiSummBtn');

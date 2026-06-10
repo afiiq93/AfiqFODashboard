@@ -1,5 +1,6 @@
 import { getCloudConfig, setCloudConfig, cloudEnabled, cloudTest, SETUP_SQL } from './cloud.js';
 import { getAIConfig, setAIConfig, aiEnabled, aiTest } from './ai.js';
+import { getFeeds, setFeeds, getRssKey, setRssKey } from './feed.js';
 import { pushLocalToCloud, PRODUCTS } from './store.js';
 import { toast, rerender } from './app.js';
 
@@ -8,6 +9,8 @@ export async function renderSettings(view, state) {
   const connected = cloudEnabled();
   const ai = getAIConfig() || { key: '', model: 'claude-opus-4-8' };
   const aiOn = aiEnabled();
+  const feedLines = escapeHtml(getFeeds().map((f) => `${f.name} | ${f.url}`).join('\n'));
+  const rssKey = escapeHtml(getRssKey());
 
   view.innerHTML = `
     <div class="page-head"><h1>Settings · Cloud Sync</h1></div>
@@ -96,6 +99,27 @@ export async function renderSettings(view, state) {
     <div class="notice">
       <b>Security:</b> your API key is stored in this browser only (never committed to the public site). Keep it to your own devices — anyone with the key could spend your Anthropic credit. You can remove it here anytime.
     </div>
+
+    <div class="page-head" style="margin-top:26px"><h1>News Feed Sources</h1></div>
+    <p class="page-sub">The live feed on the News page pulls these RSS feeds. One per line as <code>Name | URL</code>.</p>
+
+    <div class="panel">
+      <form id="feedForm">
+        <div class="field">
+          <label for="feedsText">Feeds</label>
+          <textarea id="feedsText" rows="4" placeholder="OilPrice | https://oilprice.com/rss/main">${feedLines}</textarea>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label for="rsskey">rss2json API key (optional — only needed for high volume)</label>
+          <input class="input" type="text" id="rsskey" placeholder="leave blank to use the free shared tier" value="${rssKey}" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save feeds</button>
+          <span class="hint" id="feedStatus" style="align-self:center"></span>
+        </div>
+      </form>
+      <p class="hint">Good marine/energy feeds to add: Ship &amp; Bunker, Hellenic Shipping News, Rigzone, Reuters Energy. Feeds the converter can't reach are skipped automatically.</p>
+    </div>
   `;
 
   const $ = (id) => view.querySelector('#' + id);
@@ -163,6 +187,25 @@ export async function renderSettings(view, state) {
       catch (err) { $('aiStatus').innerHTML = `<span class="down">Test failed:</span> ${escapeHtml(err.message)}`; }
     });
   }
+
+  // ---- news feeds ----
+  $('feedForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const feeds = $('feedsText').value.split('\n').map((line) => {
+      const s = line.trim();
+      if (!s) return null;
+      const [a, b] = s.split('|').map((x) => x.trim());
+      const url = b || a;
+      if (!/^https?:\/\//.test(url)) return null;
+      let name = b ? a : '';
+      if (!name) { try { name = new URL(url).hostname.replace(/^www\./, ''); } catch { name = 'Feed'; } }
+      return { name, url };
+    }).filter(Boolean);
+    setFeeds(feeds);
+    setRssKey($('rsskey').value);
+    $('feedStatus').innerHTML = `<span class="up">Saved ${feeds.length} feed(s) ✓</span>`;
+    toast('Feeds saved');
+  });
 }
 
 function escapeHtml(s) {
