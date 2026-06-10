@@ -1,4 +1,5 @@
 import { getNews, saveNews, deleteNews, getRecords, productByCode } from './store.js';
+import { aiEnabled, summarizeArticle } from './ai.js';
 import { toast, rerender } from './app.js';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -6,6 +7,7 @@ const fmtDate = (s) => new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { d
 
 export async function renderNews(view, state) {
   const news = (await getNews()).sort((a, b) => b.date.localeCompare(a.date));
+  const aiReady = aiEnabled();
 
   // Price context: map of date -> MOPS day-on-day move for the active product,
   // so a headline can be read against how the market actually moved.
@@ -19,6 +21,20 @@ export async function renderNews(view, state) {
   view.innerHTML = `
     <div class="page-head"><h1>Market News</h1></div>
     <p class="page-sub">Log the headlines that move the market and tag them bullish / bearish / neutral. Each item shows how MOPS moved that day so you can see the link between news and price.</p>
+
+    <div class="panel">
+      <h2>Summarise an article with AI</h2>
+      <p class="hint">${aiReady
+        ? 'Paste an article below and it will be summarised in your format, then fill the form for you to review and save.'
+        : 'Add an Anthropic API key in <b>Settings</b> to enable AI summaries. You can still log headlines manually below.'}</p>
+      <div class="field">
+        <textarea id="aiInput" rows="5" placeholder="Paste the news article text here…" ${aiReady ? '' : 'disabled'}></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="aiSummBtn" ${aiReady ? '' : 'disabled'}>Summarise with AI</button>
+        <span class="hint" id="aiSummStatus" style="align-self:center"></span>
+      </div>
+    </div>
 
     <div class="panel">
       <h2>Add a headline</h2>
@@ -79,6 +95,39 @@ export async function renderNews(view, state) {
   view.querySelectorAll('[data-delnews]').forEach((b) =>
     b.addEventListener('click', async () => { if (confirm('Delete this headline?')) { await deleteNews(b.dataset.delnews); rerender(); } })
   );
+
+  if (aiReady) {
+    const btn = view.querySelector('#aiSummBtn');
+    const status = view.querySelector('#aiSummStatus');
+    btn.addEventListener('click', async () => {
+      const txt = view.querySelector('#aiInput').value.trim();
+      if (txt.length < 40) { toast('Paste a longer article'); return; }
+      btn.disabled = true;
+      status.textContent = 'Summarising…';
+      try {
+        const s = await summarizeArticle(txt);
+        view.querySelector('#nhead').value = s.headline || '';
+        view.querySelector('#nsent').value = ['bull', 'bear', 'neutral'].includes(s.price_read) ? s.price_read : 'neutral';
+        view.querySelector('#nsource').value = s.source || '';
+        view.querySelector('#nbody').value = formatBrief(s);
+        status.innerHTML = '<span class="up">Done ✓</span> — review below and Save headline.';
+        view.querySelector('#nhead').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        status.innerHTML = `<span class="down">Failed:</span> ${escape(err.message)}`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+}
+
+function formatBrief(s) {
+  const lines = [];
+  if (s.what_happened) lines.push(`What happened: ${s.what_happened}`);
+  if (s.why_it_matters) lines.push(`Why it matters: ${s.why_it_matters}`);
+  if (s.key_numbers) lines.push(`Key numbers: ${s.key_numbers}`);
+  if (s.instruments) lines.push(`Affected: ${s.instruments}`);
+  return lines.join('\n');
 }
 
 function itemHtml(n, move) {

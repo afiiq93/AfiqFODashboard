@@ -1,10 +1,13 @@
 import { getCloudConfig, setCloudConfig, cloudEnabled, cloudTest, SETUP_SQL } from './cloud.js';
+import { getAIConfig, setAIConfig, aiEnabled, aiTest } from './ai.js';
 import { pushLocalToCloud, PRODUCTS } from './store.js';
 import { toast, rerender } from './app.js';
 
 export async function renderSettings(view, state) {
   const cfg = getCloudConfig() || { url: '', key: '' };
   const connected = cloudEnabled();
+  const ai = getAIConfig() || { key: '', model: 'claude-opus-4-8' };
+  const aiOn = aiEnabled();
 
   view.innerHTML = `
     <div class="page-head"><h1>Settings · Cloud Sync</h1></div>
@@ -55,6 +58,44 @@ export async function renderSettings(view, state) {
     <div class="notice">
       <b>Good to know:</b> the anon key is meant to be used in the browser. Because this dashboard is public, anyone who finds your link could in theory read or edit your fuel data — it holds no passwords or personal info, just market prices. If you'd rather lock it down to only you, tell me and I'll add a simple login step.
     </div>
+
+    <div class="page-head" style="margin-top:26px"><h1>AI News Summaries</h1></div>
+    <p class="page-sub">Add an Anthropic API key to summarise pasted articles on the News page in your format.</p>
+
+    <div class="panel">
+      <h2>Status: <span class="${aiOn ? 'up' : 'flat'}">${aiOn ? '● Key saved' : '○ No key'}</span></h2>
+      <p class="hint">The key is stored only in this browser. Each summary costs a fraction of a cent (Opus ~1¢, Haiku ~¼¢ per article).</p>
+      <form id="aiForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="aikey">Anthropic API key</label>
+            <input class="input" type="password" id="aikey" placeholder="sk-ant-…" value="${ai.key || ''}" />
+          </div>
+          <div class="field">
+            <label for="aimodel">Model</label>
+            <select class="select" id="aimodel">
+              <option value="claude-opus-4-8" ${ai.model === 'claude-opus-4-8' ? 'selected' : ''}>Opus 4.8 — best quality</option>
+              <option value="claude-haiku-4-5" ${ai.model === 'claude-haiku-4-5' ? 'selected' : ''}>Haiku 4.5 — fastest &amp; cheapest</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save key</button>
+          ${aiOn ? '<button type="button" class="btn" id="aiTestBtn">Test</button>' : ''}
+          ${aiOn ? '<button type="button" class="btn btn-danger" id="aiClearBtn">Remove key</button>' : ''}
+        </div>
+        <p class="hint" id="aiStatus"></p>
+      </form>
+      <ol class="setup-steps">
+        <li>Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> and sign up (you'll add a small amount of pay-as-you-go credit).</li>
+        <li>Open <b>API Keys</b> → <b>Create Key</b>, copy it, and paste it above.</li>
+        <li>On the <b>News</b> page, paste an article and click <b>Summarise with AI</b>.</li>
+      </ol>
+    </div>
+
+    <div class="notice">
+      <b>Security:</b> your API key is stored in this browser only (never committed to the public site). Keep it to your own devices — anyone with the key could spend your Anthropic credit. You can remove it here anytime.
+    </div>
   `;
 
   const $ = (id) => view.querySelector('#' + id);
@@ -100,6 +141,28 @@ export async function renderSettings(view, state) {
     try { await navigator.clipboard.writeText(SETUP_SQL); toast('SQL copied'); }
     catch { toast('Select and copy manually'); }
   });
+
+  // ---- AI key ----
+  $('aiForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const key = $('aikey').value.trim();
+    const model = $('aimodel').value;
+    if (!key) { toast('Enter an API key'); return; }
+    setAIConfig({ key, model });
+    $('aiStatus').innerHTML = '<span class="up">Saved ✓</span> — paste an article on the News page to summarise.';
+    toast('API key saved');
+    setTimeout(rerender, 600);
+  });
+  if (aiOn) {
+    $('aiClearBtn').addEventListener('click', () => {
+      if (confirm('Remove your API key from this browser?')) { setAIConfig(null); toast('Key removed'); rerender(); }
+    });
+    $('aiTestBtn').addEventListener('click', async () => {
+      $('aiStatus').textContent = 'Testing…';
+      try { await aiTest(); $('aiStatus').innerHTML = '<span class="up">Key works ✓</span>'; }
+      catch (err) { $('aiStatus').innerHTML = `<span class="down">Test failed:</span> ${escapeHtml(err.message)}`; }
+    });
+  }
 }
 
 function escapeHtml(s) {
