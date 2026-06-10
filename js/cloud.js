@@ -10,8 +10,13 @@ export function getCloudConfig() {
 }
 
 export function setCloudConfig(cfg) {
-  if (cfg && cfg.url && cfg.key) localStorage.setItem(LS_CLOUD, JSON.stringify({ url: cfg.url.trim().replace(/\/$/, ''), key: cfg.key.trim() }));
-  else localStorage.removeItem(LS_CLOUD);
+  if (cfg && cfg.url && cfg.key) {
+    let url = cfg.url.trim().replace(/\/+$/, '');   // drop trailing slash(es)
+    url = url.replace(/\/rest\/v1$/i, '');          // tolerate a pasted /rest/v1
+    localStorage.setItem(LS_CLOUD, JSON.stringify({ url, key: cfg.key.trim() }));
+  } else {
+    localStorage.removeItem(LS_CLOUD);
+  }
 }
 
 export function cloudEnabled() {

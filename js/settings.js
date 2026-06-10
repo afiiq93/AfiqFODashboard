@@ -23,8 +23,8 @@ export async function renderSettings(view, state) {
             <input class="input" type="url" id="curl" placeholder="https://xxxx.supabase.co" value="${cfg.url || ''}" />
           </div>
           <div class="field">
-            <label for="ckey">Anon public key</label>
-            <input class="input" type="text" id="ckey" placeholder="eyJhbGciOi…" value="${cfg.key || ''}" />
+            <label for="ckey">API key (Publishable or anon)</label>
+            <input class="input" type="text" id="ckey" placeholder="sb_publishable_… or eyJhbGci…" value="${cfg.key || ''}" />
           </div>
         </div>
         <div class="form-actions">
@@ -42,7 +42,8 @@ export async function renderSettings(view, state) {
         <li>Go to <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> and sign up (free — you can use GitHub to sign in).</li>
         <li>Click <b>New project</b>. Give it any name and a database password (save the password somewhere). Pick the region closest to you. Wait ~1 minute for it to finish setting up.</li>
         <li>In the left menu open <b>SQL Editor</b> → <b>New query</b>, paste the code below, and click <b>Run</b>. This creates the two tables.</li>
-        <li>In the left menu open <b>Project Settings</b> (gear) → <b>API</b>. Copy the <b>Project URL</b> and the <b>anon public</b> key into the boxes above, then click <b>Connect</b>.</li>
+        <li>Open <b>Project Settings</b> (gear, bottom-left) → <b>Data API</b>. Copy the <b>Project URL</b> (it ends in <code>.supabase.co</code>) into the box above.</li>
+        <li>Then go to <b>Project Settings</b> → <b>API Keys</b> and copy the <b>Publishable key</b> (<code>sb_publishable_…</code>). Either that or the legacy <b>anon</b> key works. Paste it above and click <b>Connect</b>.</li>
         <li>On your other devices (phone, etc.), open this same Settings page and paste the same two values. Done — everything syncs.</li>
       </ol>
 
