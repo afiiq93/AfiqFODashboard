@@ -8,8 +8,8 @@ import {
 
 export const PRODUCTS = [
   { code: 'MF05', name: 'Marine Fuel 0.5', unit: 'USD/mt', active: true, file: 'data/marine-fuel-05.json' },
+  { code: 'HSFO', name: 'HSFO 380',        unit: 'USD/mt', active: true, file: 'data/hsfo-380.json' },
   { code: 'GO10', name: 'Gasoil 10ppm',    unit: 'USD/mt', active: false },
-  { code: 'HSFO', name: 'HSFO 380cst',     unit: 'USD/mt', active: false },
 ];
 
 const LS_RECORDS = (code) => `afo:records:${code}`;

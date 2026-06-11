@@ -1,0 +1,428 @@
+{
+  "product": "HSFO 380",
+  "code": "HSFO",
+  "unit": "USD/mt",
+  "benchmark": "Platts MOPS 380 CST Singapore",
+  "fields": {
+    "mops": "Platts MOPS 380cst physical assessment",
+    "mocM": "MOC front-month (M) swap",
+    "mocM1": "MOC second-month (M+1) swap"
+  },
+  "note": "MOPS spans Mar-Jun 2026; MOC swaps available 4 May-8 Jun. Differentials shown where both exist.",
+  "records": [
+    {
+      "date": "2026-03-02",
+      "mops": 499.1,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-03",
+      "mops": 523.41,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-04",
+      "mops": 564.11,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-05",
+      "mops": 594.48,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-06",
+      "mops": 647.53,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-09",
+      "mops": 878.29,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-10",
+      "mops": 681.27,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-11",
+      "mops": 669.45,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-12",
+      "mops": 778.49,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-13",
+      "mops": 737.39,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-16",
+      "mops": 766.66,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-17",
+      "mops": 749.61,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-18",
+      "mops": 744.29,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-19",
+      "mops": 782.09,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-20",
+      "mops": 737.0,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-23",
+      "mops": 775.89,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-24",
+      "mops": 685.03,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-25",
+      "mops": 634.74,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-26",
+      "mops": 656.85,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-27",
+      "mops": 712.43,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-30",
+      "mops": 733.98,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-03-31",
+      "mops": 693.06,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-01",
+      "mops": 657.23,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-02",
+      "mops": 732.18,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-06",
+      "mops": 725.12,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-07",
+      "mops": 720.09,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-08",
+      "mops": 627.01,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-09",
+      "mops": 637.91,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-10",
+      "mops": 628.72,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-13",
+      "mops": 658.45,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-14",
+      "mops": 653.91,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-15",
+      "mops": 633.9,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-16",
+      "mops": 630.17,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-17",
+      "mops": 630.06,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-20",
+      "mops": 605.54,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-21",
+      "mops": 583.9,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-22",
+      "mops": 621.51,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-23",
+      "mops": 634.0,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-24",
+      "mops": 657.12,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-27",
+      "mops": 659.99,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-28",
+      "mops": 679.02,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-29",
+      "mops": 674.61,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-04-30",
+      "mops": 705.81,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-05-04",
+      "mops": 684.76,
+      "mocM": 664.8,
+      "mocM1": 635.5
+    },
+    {
+      "date": "2026-05-05",
+      "mops": 734.61,
+      "mocM": 710.25,
+      "mocM1": 669.0
+    },
+    {
+      "date": "2026-05-06",
+      "mops": 737.36,
+      "mocM": 716.0,
+      "mocM1": 669.0
+    },
+    {
+      "date": "2026-05-07",
+      "mops": 678.54,
+      "mocM": 663.5,
+      "mocM1": 625.5
+    },
+    {
+      "date": "2026-05-08",
+      "mops": 660.6,
+      "mocM": 647.05,
+      "mocM1": 622.05
+    },
+    {
+      "date": "2026-05-11",
+      "mops": 674.04,
+      "mocM": 664.7,
+      "mocM1": 641.45
+    },
+    {
+      "date": "2026-05-12",
+      "mops": 682.49,
+      "mocM": 674.95,
+      "mocM1": 652.95
+    },
+    {
+      "date": "2026-05-13",
+      "mops": 674.12,
+      "mocM": 668.75,
+      "mocM1": 648.1
+    },
+    {
+      "date": "2026-05-14",
+      "mops": 683.56,
+      "mocM": 680.0,
+      "mocM1": 654.5
+    },
+    {
+      "date": "2026-05-15",
+      "mops": 712.21,
+      "mocM": 709.75,
+      "mocM1": 678.5
+    },
+    {
+      "date": "2026-05-18",
+      "mops": 717.7,
+      "mocM": 716.45,
+      "mocM1": 687.95
+    },
+    {
+      "date": "2026-05-19",
+      "mops": 714.19,
+      "mocM": 713.75,
+      "mocM1": 687.0
+    },
+    {
+      "date": "2026-05-20",
+      "mops": 690.96,
+      "mocM": 691.7,
+      "mocM1": 665.95
+    },
+    {
+      "date": "2026-05-21",
+      "mops": 661.66,
+      "mocM": 659.95,
+      "mocM1": 639.45
+    },
+    {
+      "date": "2026-05-22",
+      "mops": 670.61,
+      "mocM": 673.0,
+      "mocM1": 653.75
+    },
+    {
+      "date": "2026-05-25",
+      "mops": 627.01,
+      "mocM": 614.0,
+      "mocM1": 580.75
+    },
+    {
+      "date": "2026-05-26",
+      "mops": 629.45,
+      "mocM": 618.2,
+      "mocM1": 582.55
+    },
+    {
+      "date": "2026-05-28",
+      "mops": 632.13,
+      "mocM": 620.45,
+      "mocM1": 576.45
+    },
+    {
+      "date": "2026-05-29",
+      "mops": 624.31,
+      "mocM": 612.95,
+      "mocM1": 565.5
+    },
+    {
+      "date": "2026-06-02",
+      "mops": 641.51,
+      "mocM": 630.75,
+      "mocM1": 580.5
+    },
+    {
+      "date": "2026-06-03",
+      "mops": 648.34,
+      "mocM": 633.95,
+      "mocM1": 592.25
+    },
+    {
+      "date": "2026-06-04",
+      "mops": 630.05,
+      "mocM": 614.8,
+      "mocM1": 581.75
+    },
+    {
+      "date": "2026-06-05",
+      "mops": 612.36,
+      "mocM": 597.75,
+      "mocM1": 565.0
+    },
+    {
+      "date": "2026-06-08",
+      "mops": 630.36,
+      "mocM": 617.55,
+      "mocM1": 585.25
+    },
+    {
+      "date": "2026-06-09",
+      "mops": 594.07,
+      "mocM": null,
+      "mocM1": null
+    },
+    {
+      "date": "2026-06-10",
+      "mops": 590.51,
+      "mocM": null,
+      "mocM1": null
+    }
+  ]
+}
