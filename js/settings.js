@@ -1,6 +1,6 @@
 import { getCloudConfig, setCloudConfig, cloudEnabled, cloudTest, SETUP_SQL } from './cloud.js';
 import { getAIConfig, setAIConfig, aiEnabled, aiTest } from './ai.js';
-import { getFeeds, setFeeds, getRssKey, setRssKey } from './feed.js';
+import { getFeeds, setFeeds } from './feed.js';
 import { pushLocalToCloud, PRODUCTS } from './store.js';
 import { toast, rerender } from './app.js';
 
@@ -10,7 +10,6 @@ export async function renderSettings(view, state) {
   const ai = getAIConfig() || { key: '', model: 'claude-opus-4-8' };
   const aiOn = aiEnabled();
   const feedLines = escapeHtml(getFeeds().map((f) => `${f.name} | ${f.url}`).join('\n'));
-  const rssKey = escapeHtml(getRssKey());
 
   view.innerHTML = `
     <div class="page-head"><h1>Settings · Cloud Sync</h1></div>
@@ -106,12 +105,8 @@ export async function renderSettings(view, state) {
     <div class="panel">
       <form id="feedForm">
         <div class="field">
-          <label for="feedsText">Feeds</label>
-          <textarea id="feedsText" rows="4" placeholder="OilPrice | https://oilprice.com/rss/main">${feedLines}</textarea>
-        </div>
-        <div class="field" style="margin-top:12px">
-          <label for="rsskey">rss2json API key (optional — only needed for high volume)</label>
-          <input class="input" type="text" id="rsskey" placeholder="leave blank to use the free shared tier" value="${rssKey}" />
+          <label for="feedsText">Feeds (RSS/Atom URLs)</label>
+          <textarea id="feedsText" rows="4" placeholder="Marine fuel | https://news.google.com/rss/search?q=bunker">${feedLines}</textarea>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save feeds</button>
@@ -202,7 +197,6 @@ export async function renderSettings(view, state) {
       return { name, url };
     }).filter(Boolean);
     setFeeds(feeds);
-    setRssKey($('rsskey').value);
     $('feedStatus').innerHTML = `<span class="up">Saved ${feeds.length} feed(s) ✓</span>`;
     toast('Feeds saved');
   });

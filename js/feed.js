@@ -1,13 +1,19 @@
-// Live news feed — pulls RSS feeds via a free browser-friendly JSON converter
-// (rss2json) so it works from the static site with no backend. Feed list and
-// optional API key live in this browser's localStorage.
+// Live news feed — fetches RSS/Atom feeds through free CORS proxies and parses
+// them in the browser (no backend, no API key). Default feeds use Google News
+// search queries, which are reliable and aggregate many sources.
 
 const LS_FEEDS = 'afo:feeds';
-const LS_RSSKEY = 'afo:rss2json';
 
 export const DEFAULT_FEEDS = [
-  { name: 'OilPrice', url: 'https://oilprice.com/rss/main' },
-  { name: 'Investing — Commodities', url: 'https://www.investing.com/rss/news_11.rss' },
+  { name: 'Marine fuel & bunkers', url: 'https://news.google.com/rss/search?q=(marine+fuel+OR+bunker+OR+VLSFO+OR+HSFO+OR+gasoil)+when:7d&hl=en-US&gl=US&ceid=US:en' },
+  { name: 'Crude & OPEC', url: 'https://news.google.com/rss/search?q=(crude+oil+OR+Brent+OR+OPEC)+when:3d&hl=en-US&gl=US&ceid=US:en' },
+];
+
+// Tried in order until one returns the feed. Free, public, CORS-enabled.
+const PROXIES = [
+  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
 ];
 
 export function getFeeds() {
@@ -18,31 +24,49 @@ export function getFeeds() {
 }
 export function setFeeds(list) { localStorage.setItem(LS_FEEDS, JSON.stringify(list)); }
 
-export function getRssKey() { return localStorage.getItem(LS_RSSKEY) || ''; }
-export function setRssKey(k) { if (k) localStorage.setItem(LS_RSSKEY, k.trim()); else localStorage.removeItem(LS_RSSKEY); }
-
 function stripHtml(s) {
   const d = document.createElement('div');
   d.innerHTML = s || '';
   return (d.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
+async function fetchRaw(feedUrl) {
+  let lastErr;
+  for (const proxy of PROXIES) {
+    try {
+      const res = await fetch(proxy(feedUrl), { headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' } });
+      if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
+      const text = await res.text();
+      if (text && text.indexOf('<') !== -1) return text;
+      lastErr = new Error('empty');
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('all proxies failed');
+}
+
+function parseFeed(xml, sourceName) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  if (doc.querySelector('parsererror')) throw new Error('parse error');
+  const nodes = Array.from(doc.querySelectorAll('item, entry'));
+  return nodes.map((n) => {
+    const get = (sel) => n.querySelector(sel)?.textContent?.trim() || '';
+    let link = get('link');
+    if (!link) { const la = n.querySelector('link'); link = la?.getAttribute('href') || ''; }
+    const desc = get('description') || get('summary') || get('content');
+    // Google News titles come as "Headline - Source"; keep as-is.
+    return {
+      title: get('title') || '(untitled)',
+      link,
+      pubDate: get('pubDate') || get('published') || get('updated') || '',
+      snippet: stripHtml(desc).slice(0, 320),
+      source: get('source') || sourceName,
+    };
+  });
+}
+
 async function fetchOne(feed) {
-  const key = getRssKey();
-  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`
-    + (key ? `&api_key=${encodeURIComponent(key)}` : '') + '&count=12';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${res.status}`);
-  const data = await res.json();
-  if (data.status !== 'ok') throw new Error(data.message || 'feed error');
-  const source = feed.name || data.feed?.title || 'Feed';
-  return (data.items || []).map((it) => ({
-    title: it.title || '(untitled)',
-    link: it.link || '',
-    source,
-    pubDate: it.pubDate || '',
-    snippet: stripHtml(it.description || it.content || '').slice(0, 320),
-  }));
+  const xml = await fetchRaw(feed.url);
+  return parseFeed(xml, feed.name || 'Feed');
 }
 
 // Fetch all feeds, merge newest-first, report which feeds failed.
@@ -55,8 +79,11 @@ export async function fetchFeeds() {
     if (r.status === 'fulfilled') items.push(...r.value);
     else errors.push(feeds[i].name || feeds[i].url);
   });
-  items.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
-  return { items, errors };
+  // de-dupe by link
+  const seen = new Set();
+  const unique = items.filter((it) => { const k = it.link || it.title; if (seen.has(k)) return false; seen.add(k); return true; });
+  unique.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+  return { items: unique, errors };
 }
 
 export function relativeTime(dateStr) {
@@ -67,6 +94,5 @@ export function relativeTime(dateStr) {
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.round(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.round(hrs / 24);
-  return `${days}d ago`;
+  return `${Math.round(hrs / 24)}d ago`;
 }
