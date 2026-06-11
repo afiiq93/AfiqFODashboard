@@ -1,4 +1,5 @@
 import { getRecords, getMeta, productByCode, deleteRecord, toCSV, download } from './store.js';
+import { statCard } from './cards.js';
 import { toast, rerender } from './app.js';
 
 let priceChart, spreadChart;
@@ -6,13 +7,6 @@ let priceChart, spreadChart;
 const fmt = (v, d = 2) => (v == null ? '—' : v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }));
 const fmtDate = (s) => new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 
-function changeCell(curr, prev) {
-  if (curr == null || prev == null) return '<span class="chg flat">—</span>';
-  const d = Math.round((curr - prev) * 100) / 100;
-  const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
-  const arrow = d > 0 ? '▲' : d < 0 ? '▼' : '·';
-  return `<span class="chg ${cls}">${arrow} ${fmt(Math.abs(d))}</span>`;
-}
 
 export async function renderDashboard(view, state) {
   const product = productByCode(state.product);
@@ -25,6 +19,7 @@ export async function renderDashboard(view, state) {
   const [records, meta] = await Promise.all([getRecords(state.product), getMeta(state.product)]);
   const range = localStorage.getItem('afo:range') || '3M';
   const shown = applyRange(records, range);
+  const ser = (k) => shown.map((r) => r[k]);
 
   const last = records[records.length - 1] || {};
   const prev = records[records.length - 2] || {};
@@ -37,12 +32,12 @@ export async function renderDashboard(view, state) {
     <p class="page-sub">Latest assessment: <b>${last.date ? fmtDate(last.date) + ' ' + new Date(last.date).getFullYear() : '—'}</b></p>
 
     <div class="cards">
-      ${card('MOPS', last.mops, prev.mops, meta.unit)}
-      ${card('MOC M', last.mocM, prev.mocM, meta.unit)}
-      ${card('MOC M+1', last.mocM1, prev.mocM1, meta.unit)}
-      ${card('MOPS / M+1', last.mopsVsM1, prev.mopsVsM1, '')}
-      ${card('MOC M / M+1', last.mVsM1, prev.mVsM1, '')}
-      ${card('MOPS / M', last.mopsVsM, prev.mopsVsM, '')}
+      ${statCard({ icon: '〽️', title: 'MOPS', value: last.mops, prev: prev.mops, unit: meta.unit, series: ser('mops') })}
+      ${statCard({ icon: '📈', title: 'MOC M', value: last.mocM, prev: prev.mocM, unit: meta.unit, series: ser('mocM') })}
+      ${statCard({ icon: '📉', title: 'MOC M+1', value: last.mocM1, prev: prev.mocM1, unit: meta.unit, series: ser('mocM1') })}
+      ${statCard({ icon: '↔️', title: 'MOPS / M+1', value: last.mopsVsM1, prev: prev.mopsVsM1, unit: '', series: ser('mopsVsM1') })}
+      ${statCard({ icon: '📊', title: 'MOC M / M+1', value: last.mVsM1, prev: prev.mVsM1, unit: '', series: ser('mVsM1') })}
+      ${statCard({ icon: '➗', title: 'MOPS / M', value: last.mopsVsM, prev: prev.mopsVsM, unit: '', series: ser('mopsVsM') })}
     </div>
 
     <div class="toolbar">
@@ -106,13 +101,6 @@ export async function renderDashboard(view, state) {
   drawCharts(shown, meta.unit);
 }
 
-function card(label, val, prev, unit) {
-  return `<div class="card">
-    <div class="label">${label}</div>
-    <div class="value">${fmt(val)}${unit ? `<span style="font-size:12px;color:var(--muted)"> ${unit}</span>` : ''}</div>
-    ${changeCell(val, prev)}
-  </div>`;
-}
 
 function rowHtml(r) {
   const cell = (v) => (v == null ? '<td class="na">n/a</td>' : `<td>${fmt(v)}</td>`);

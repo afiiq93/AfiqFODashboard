@@ -72,7 +72,7 @@ body {
 .spacer { flex: 1; }
 
 /* Cards */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.cards, .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .card {
   background: linear-gradient(180deg, var(--panel) 0%, var(--bg-soft) 100%);
   border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
@@ -84,6 +84,25 @@ body {
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--muted); }
+
+/* Stat card with sparkline + DoD */
+.statc {
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg-soft) 100%);
+  border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px;
+  box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 16px;
+}
+.statc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.statc-title { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.statc-ic { font-size: 14px; opacity: .9; }
+.statc-spark { flex-shrink: 0; line-height: 0; }
+.statc-spark .spark { display: block; }
+.statc-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.statc-val { font-size: 26px; font-weight: 700; letter-spacing: -.5px; line-height: 1; }
+.statc-u { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 3px; }
+.statc-dod { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.statc-dod.up { color: var(--up); }
+.statc-dod.down { color: var(--down); }
+.statc-dod.flat { color: var(--muted); }
 
 /* Panels */
 .panel {

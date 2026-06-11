@@ -3,6 +3,7 @@
 // new entries saved in this browser (cloud sync can be added later).
 
 import { download } from './store.js';
+import { statCard } from './cards.js';
 import { toast, rerender } from './app.js';
 
 const SEED_FILE = 'data/fuel-swap-moc.json';
@@ -55,20 +56,13 @@ function applyRange(rows, range) {
   return rows.filter((r) => new Date(r.date) >= cutoff);
 }
 
-function chg(curr, prev) {
-  if (curr == null || prev == null) return '<span class="chg flat">—</span>';
-  const d = Math.round((curr - prev) * 100) / 100;
-  const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
-  const arrow = d > 0 ? '▲' : d < 0 ? '▼' : '·';
-  return `<span class="chg ${cls}">${arrow} ${fmt(Math.abs(d))}</span>`;
-}
-
 export async function renderSwaps(view) {
   const rows = await getSwaps();
   const range = localStorage.getItem('afo:swapsRange') || '3M';
   const shown = applyRange(rows, range);
   const last = rows[rows.length - 1] || {};
   const prev = rows[rows.length - 2] || {};
+  const ser = (k) => shown.map((r) => r[k]);
 
   view.innerHTML = `
     <div class="page-head"><h1>Fuel Swap MOC — Spreads</h1>
@@ -76,11 +70,11 @@ export async function renderSwaps(view) {
     <p class="page-sub">Latest: <b>${last.date ? fmtDate(last.date) + ' ' + yr(last.date) : '—'}</b> · Hi/Fi = VLSFO 0.5% − HSFO 380</p>
 
     <div class="stats">
-      ${stat('HSFO 380 (M)', last.hsfo380_m, prev.hsfo380_m, 'USD/mt')}
-      ${stat('VLSFO 0.5% (M)', last.vlsfo_m, prev.vlsfo_m, 'USD/mt')}
-      ${stat('Hi/Fi spread', last.hifi, prev.hifi, 'USD/mt')}
-      ${stat('HSFO 380 (M+1)', last.hsfo380_m1, prev.hsfo380_m1, 'USD/mt')}
-      ${stat('VLSFO 0.5% (M+1)', last.vlsfo_m1, prev.vlsfo_m1, 'USD/mt')}
+      ${statCard({ icon: '⛽', title: 'HSFO 380 (M)', value: last.hsfo380_m, prev: prev.hsfo380_m, unit: '$/mt', series: ser('hsfo380_m') })}
+      ${statCard({ icon: '🛢️', title: 'VLSFO 0.5% (M)', value: last.vlsfo_m, prev: prev.vlsfo_m, unit: '$/mt', series: ser('vlsfo_m') })}
+      ${statCard({ icon: '📊', title: 'Hi/Fi spread', value: last.hifi, prev: prev.hifi, unit: '$/mt', series: ser('hifi') })}
+      ${statCard({ icon: '⛽', title: 'HSFO 380 (M+1)', value: last.hsfo380_m1, prev: prev.hsfo380_m1, unit: '$/mt', series: ser('hsfo380_m1') })}
+      ${statCard({ icon: '🛢️', title: 'VLSFO 0.5% (M+1)', value: last.vlsfo_m1, prev: prev.vlsfo_m1, unit: '$/mt', series: ser('vlsfo_m1') })}
     </div>
 
     <div class="panel">
@@ -150,9 +144,6 @@ export async function renderSwaps(view) {
   drawChart(shown);
 }
 
-function stat(label, val, prev, unit) {
-  return `<div class="stat"><div class="label">${label}</div><div class="value">${fmt(val)}<span class="u"> ${unit}</span></div>${chg(val, prev)}</div>`;
-}
 function rowHtml(r) {
   const c = (v) => (v == null ? '<td class="na">n/a</td>' : `<td>${fmt(v)}</td>`);
   return `<tr><td>${fmtDate(r.date)} ${yr(r.date)}</td>${c(r.hsfo380_m)}${c(r.hsfo380_m1)}${c(r.vlsfo_m)}${c(r.vlsfo_m1)}${c(r.hifi)}<td class="actions-cell"><button class="btn btn-sm btn-danger" data-delswap="${r.date}">Delete</button></td></tr>`;
