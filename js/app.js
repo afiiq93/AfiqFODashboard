@@ -3,6 +3,7 @@ import { renderDashboard } from './dashboard.js';
 import { renderEntry } from './entry.js';
 import { renderNews } from './news.js';
 import { renderSettings } from './settings.js';
+import { renderSwaps } from './swaps.js';
 
 const state = {
   product: localStorage.getItem('afo:product') || 'MF05',
@@ -11,6 +12,7 @@ const state = {
 const routes = {
   dashboard: renderDashboard,
   entry: renderEntry,
+  swaps: renderSwaps,
   news: renderNews,
   settings: renderSettings,
 };

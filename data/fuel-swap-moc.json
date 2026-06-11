@@ -1,0 +1,181 @@
+{
+  "name": "Fuel Swap MOC",
+  "unit": "USD/mt",
+  "note": "Front-month (M) and next-month (M+1) Market-on-Close fuel swaps. Hi/Fi = VLSFO 0.5% minus HSFO 380, computed in-app. 180cst/VIS ignored; LSMGO not in source.",
+  "fields": {
+    "hsfo380_m": "HSFO 380 front-month swap",
+    "hsfo380_m1": "HSFO 380 second-month swap",
+    "vlsfo_m": "VLSFO 0.5% front-month swap",
+    "vlsfo_m1": "VLSFO 0.5% second-month swap"
+  },
+  "records": [
+    {
+      "date": "2026-05-04",
+      "hsfo380_m": 664.8,
+      "hsfo380_m1": 635.5,
+      "vlsfo_m": 770.3,
+      "vlsfo_m1": 737.05
+    },
+    {
+      "date": "2026-05-05",
+      "hsfo380_m": 710.25,
+      "hsfo380_m1": 669.0,
+      "vlsfo_m": 832.6,
+      "vlsfo_m1": 786.1
+    },
+    {
+      "date": "2026-05-06",
+      "hsfo380_m": 716.0,
+      "hsfo380_m1": 669.0,
+      "vlsfo_m": 796.5,
+      "vlsfo_m1": 751.0
+    },
+    {
+      "date": "2026-05-07",
+      "hsfo380_m": 663.5,
+      "hsfo380_m1": 625.5,
+      "vlsfo_m": 741.75,
+      "vlsfo_m1": 702.75
+    },
+    {
+      "date": "2026-05-08",
+      "hsfo380_m": 647.05,
+      "hsfo380_m1": 622.05,
+      "vlsfo_m": 738.25,
+      "vlsfo_m1": 702.75
+    },
+    {
+      "date": "2026-05-11",
+      "hsfo380_m": 664.7,
+      "hsfo380_m1": 641.45,
+      "vlsfo_m": 762.25,
+      "vlsfo_m1": 725.75
+    },
+    {
+      "date": "2026-05-12",
+      "hsfo380_m": 674.95,
+      "hsfo380_m1": 652.95,
+      "vlsfo_m": 797.25,
+      "vlsfo_m1": 760.0
+    },
+    {
+      "date": "2026-05-13",
+      "hsfo380_m": 668.75,
+      "hsfo380_m1": 648.1,
+      "vlsfo_m": 786.95,
+      "vlsfo_m1": 751.45
+    },
+    {
+      "date": "2026-05-14",
+      "hsfo380_m": 680.0,
+      "hsfo380_m1": 654.5,
+      "vlsfo_m": 794.25,
+      "vlsfo_m1": 755.0
+    },
+    {
+      "date": "2026-05-15",
+      "hsfo380_m": 709.75,
+      "hsfo380_m1": 678.5,
+      "vlsfo_m": 815.25,
+      "vlsfo_m1": 770.0
+    },
+    {
+      "date": "2026-05-18",
+      "hsfo380_m": 716.45,
+      "hsfo380_m1": 687.95,
+      "vlsfo_m": 845.5,
+      "vlsfo_m1": 794.0
+    },
+    {
+      "date": "2026-05-19",
+      "hsfo380_m": 713.75,
+      "hsfo380_m1": 687.0,
+      "vlsfo_m": 833.7,
+      "vlsfo_m1": 788.45
+    },
+    {
+      "date": "2026-05-20",
+      "hsfo380_m": 691.7,
+      "hsfo380_m1": 665.95,
+      "vlsfo_m": 810.3,
+      "vlsfo_m1": 771.05
+    },
+    {
+      "date": "2026-05-21",
+      "hsfo380_m": 659.95,
+      "hsfo380_m1": 639.45,
+      "vlsfo_m": 779.75,
+      "vlsfo_m1": 742.75
+    },
+    {
+      "date": "2026-05-22",
+      "hsfo380_m": 673.0,
+      "hsfo380_m1": 653.75,
+      "vlsfo_m": 794.7,
+      "vlsfo_m1": 756.7
+    },
+    {
+      "date": "2026-05-25",
+      "hsfo380_m": 614.0,
+      "hsfo380_m1": 580.75,
+      "vlsfo_m": 723.5,
+      "vlsfo_m1": 682.0
+    },
+    {
+      "date": "2026-05-26",
+      "hsfo380_m": 618.2,
+      "hsfo380_m1": 582.55,
+      "vlsfo_m": 727.25,
+      "vlsfo_m1": 684.75
+    },
+    {
+      "date": "2026-05-28",
+      "hsfo380_m": 620.45,
+      "hsfo380_m1": 576.45,
+      "vlsfo_m": 721.0,
+      "vlsfo_m1": 676.25
+    },
+    {
+      "date": "2026-05-29",
+      "hsfo380_m": 612.95,
+      "hsfo380_m1": 565.5,
+      "vlsfo_m": 709.5,
+      "vlsfo_m1": 663.5
+    },
+    {
+      "date": "2026-06-02",
+      "hsfo380_m": 630.75,
+      "hsfo380_m1": 580.5,
+      "vlsfo_m": 722.2,
+      "vlsfo_m1": 673.0
+    },
+    {
+      "date": "2026-06-03",
+      "hsfo380_m": 633.95,
+      "hsfo380_m1": 592.25,
+      "vlsfo_m": 740.95,
+      "vlsfo_m1": 696.5
+    },
+    {
+      "date": "2026-06-04",
+      "hsfo380_m": 614.8,
+      "hsfo380_m1": 581.75,
+      "vlsfo_m": 734.3,
+      "vlsfo_m1": 689.3
+    },
+    {
+      "date": "2026-06-05",
+      "hsfo380_m": 597.75,
+      "hsfo380_m1": 565.0,
+      "vlsfo_m": 718.5,
+      "vlsfo_m1": 673.75
+    },
+    {
+      "date": "2026-06-08",
+      "hsfo380_m": 617.55,
+      "hsfo380_m1": 585.25,
+      "vlsfo_m": 732.0,
+      "vlsfo_m1": 692.0
+    }
+  ]
+}
